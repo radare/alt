@@ -1,0 +1,67 @@
+#!/usr/bin/perl
+
+/* Where data and code melts */
+# This is where metadata and code melts
+
+Library:Socket {
+  Description = "Socket library"
+  Sources {
+    foo.c
+    main.c
+  }
+  Dependencies {
+    Library.Util
+    Library.Syscall
+  }
+  CompileType = fun
+}
+
+.includedir = ..
+.include { }
+
+# main program #
+
+main {
+  a = 0
+  b = 4
+  args { "hello World %d" 33 }
+  .printf args
+  .printf { "hello world %d\n" 33 }
+  .if {
+    a == 3  # if condition fails, skip if {} block
+    .printf { "a is 3\n" }
+    .if {
+       b == 4
+       .printf { "b is 4\n" }
+    }
+  }
+}
+
+/*
+ast[0] = {
+  "Library:Socket" = {
+     "Description" = "..."
+     "Sources" = {
+       "foo.c"
+       "main.c"
+     }
+     "Dependencies" = {
+     }
+  }
+  ".includedir" = ".."
+  ".include" = {}
+
+  "main" {
+    a = 0;
+  }
+}
+
+struct AstElement {
+  char name[MAX_AST_NAME];
+  char value[MAX_AST_NAME];
+  int value
+  int size;
+  struct AstElement **child;
+};
+
+*/

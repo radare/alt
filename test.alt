@@ -1,0 +1,11 @@
+# Line comment
+word1 {
+  foo bar cow
+	name = "This is new\nAnd cool"
+	Library.Name {
+		name = "stuff"
+	}
+}
+/* This is a comment */
+word2 {
+}
