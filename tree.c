@@ -1,6 +1,7 @@
 /* alt - abstract language tree // pancake<at>nopcode.org */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "alt.h"
 
@@ -16,9 +17,12 @@ typedef struct AltTree {
 } AltTree;
 
 static int engine_cb_word(AltState *st) {
+	AltNode *node;
 	AltTree *at = (AltTree *) st->user;
 	st->str[st->stridx] = 0;
-	printf("%d (%s)\n", st->level, st->str);
+	printf ("%d (%s)\n", st->level, st->str);
+	node = &at->tree[at->count[st->level]][st->level];
+	node->str = strdup (st->str);
 	at->count[st->level]++;
 }
 

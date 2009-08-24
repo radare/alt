@@ -5,3 +5,6 @@ all: ${OBJ}
 	${CC} -o ${BIN} ${OBJ}
 	#gdb --args ./${BIN} test.alt
 	./${BIN} test.alt
+
+clean:
+	rm -f ${OBJ} ${BIN}
