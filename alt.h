@@ -1,4 +1,4 @@
-#define PRINTLEVEL { int i;for(i=0;i<st->level;i++) printf("  "); }
+#define PRINTLEVEL(x) { int i;for(i=0;i<x;i++) printf("  "); }
 
 #define ALT_MAX_LEVEL 128
 typedef enum {
@@ -15,7 +15,7 @@ typedef struct AltState {
 	int levels[ALT_MAX_LEVEL];
 	int lastchar;
 	int skipuntil;
-	char str[128];
+	char str[ALT_MAX_LEVEL];
 	int stridx;
 	void (*cb_word)(struct AltState *st);
 	void (*cb_level)(struct AltState *st, int delta, char ch);
@@ -30,3 +30,4 @@ int parse_fd(AltState *st, int fd);
 int parse_file(AltState *st, const char *file);
 
 void alt_tree(AltState *st);
+void alt_tree_walk(AltState *st);

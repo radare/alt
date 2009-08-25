@@ -6,6 +6,15 @@
 #include <unistd.h>
 #include "alt.h"
 
+void parse_pushword(AltState *st) {
+	if (st->stridx == 0) // XXX CONFLICTIVE
+		return;
+	//printf("LEVELS(%d)\n", st->levels[st->level]);
+	st->str[st->stridx] = 0;
+	st->cb_word (st);
+	memset(&st->str, 0, sizeof(st->str));
+	st->stridx = 0;
+}
 
 int parse_char(AltState *st, char ch) {
 	if (ch == 0)
@@ -36,12 +45,7 @@ int parse_char(AltState *st, char ch) {
 			break;
 		case '(':
 		case '{':
-			if (st->stridx) { // SPAGUETTI
-				st->str[st->stridx] = 0;
-				st->cb_word (st);
-				memset(&st->str, 0, sizeof(st->str));
-				st->stridx = 0;
-			}
+			parse_pushword(st);
 			st->cb_level (st, 1, ch);
 			st->levels[st->level] = ch=='('?')':'}';
 			st->level++;
@@ -50,15 +54,10 @@ int parse_char(AltState *st, char ch) {
 			break;
 		case ')':
 		case '}':
-			if (st->stridx) { // SPAGUETTI
-				st->str[st->stridx] = 0;
-				st->cb_word (st);
-				memset(&st->str, 0, sizeof(st->str));
-				st->stridx = 0;
-			}
+			parse_pushword(st);
 			st->level--;
 			if (st->level<0)
-				return st->cb_error (st, "Error: underflow\n");
+				return st->cb_error (st, "Level underflow\n");
 			if (st->levels[st->level] != ch)
 				return st->cb_error (st,
 					"Unexpected closing parentesis.\n");
@@ -68,18 +67,16 @@ int parse_char(AltState *st, char ch) {
 			st->line++;
 		case ' ':
 		case ',':
+		case ';':
 		case '\t':
 		case '\r':
-			if (st->stridx) {
-				st->str[st->stridx] = 0;
-				st->cb_word (st);
-				memset(&st->str, 0, sizeof(st->str));
-				st->stridx = 0;
-			}
+			parse_pushword (st);
 			break;
 		default:
 			st->word = 1;
 			st->str[st->stridx++] = ch;
+			if (st->stridx>ALT_MAX_LEVEL)
+				return st->cb_error (st, "Too long string\n");
 			break;
 		}
 		break;
