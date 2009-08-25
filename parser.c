@@ -3,44 +3,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "alt.h"
 
 
-static int parse_operator(AltState *st, char *str) {
-	/* compare */
-#if 0
->=
-<=
-+=
--=
-#endif
-	switch (str[1]) {
-	case '>':
-	case '<':
-	case '=':
-		break;
-	}
-	/* assign */
-	switch (*str) {
-	case '=':
-		break;
-	case '+':
-		break;
-	case '-':
-		break;
-	}
-	return 0;
-}
-
 int parse_char(AltState *st, char ch) {
-	int i;
 	if (ch == 0)
 		return 0;
 
 	if (st->skipuntil) {
-		if (ch == st->skipuntil) {
+		if (ch == st->skipuntil)
 			st->skipuntil = 0;
-		} else return 1;
+		else return 1;
 	}
 
 	switch (st->mode) {
@@ -61,18 +35,33 @@ int parse_char(AltState *st, char ch) {
 		case '/':
 			break;
 		case '{':
+			if (st->stridx) {// SPAGUETTI
+				st->str[st->stridx] = 0;
+				st->cb_word (st);
+				memset(&st->str, 0, sizeof(st->str));
+				st->stridx = 0;
+			}
+			st->cb_level (st, 1);
 			st->level++;
 			break;
 		case '}':
+			if (st->stridx) { // SPAGUETTI
+				st->str[st->stridx] = 0;
+				st->cb_word (st);
+				memset(&st->str, 0, sizeof(st->str));
+				st->stridx = 0;
+			}
 			st->level--;
 			if (st->level<0) {
-				st->cb_error(st, "Error: underflow\n");
+				st->cb_error (st, "Error: underflow\n");
 				return 0;
 			}
+			st->cb_level (st, -1);
 			break;
 		case '\n':
 			st->line++;
 		case ' ':
+		case ',':
 		case '\t':
 		case '\r':
 			if (st->stridx) {
@@ -110,10 +99,10 @@ int parse_char(AltState *st, char ch) {
 			}
 			st->str[st->stridx-1] = ch;
 		} else if (ch == '"') {
-			st->mode = MODE_PARSE;
 			st->str[st->stridx] = 0;
-			cb_word(st);
+			st->cb_word (st);
 			st->stridx = 0;
+			st->mode = MODE_PARSE;
 		} else st->str[st->stridx++] = ch;
 		break;
 	}

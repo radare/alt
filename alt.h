@@ -15,8 +15,9 @@ typedef struct AltState {
 	int skipuntil;
 	char str[128];
 	int stridx;
-	int (*cb_word)(struct AltState *st);
-	int (*cb_error)(struct AltState *st, const char *fmt, ...);
+	void (*cb_word)(struct AltState *st);
+	void (*cb_level)(struct AltState *st, int delta);
+	void (*cb_error)(struct AltState *st, const char *fmt, ...);
 	void *user;
 } AltState;
 
@@ -26,4 +27,4 @@ int parse_str(AltState *st, char *str);
 int parse_fd(AltState *st, int fd);
 int parse_file(AltState *st, const char *file);
 
-void engine_tree(AltState *st);
+void alt_tree(AltState *st);

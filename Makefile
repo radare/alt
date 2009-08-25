@@ -1,3 +1,4 @@
+CFLAGS+=-Wall
 OBJ=main.o parser.o tree.o
 BIN=alt
 
