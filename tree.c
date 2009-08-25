@@ -25,35 +25,26 @@ typedef struct AltTree {
 } AltTree;
 
 static AltNode *alt_node_new() {
-	AltNode *node = (AltNode*) malloc(sizeof(AltNode));
+	AltNode *node = (AltNode*) malloc (sizeof(AltNode));
 	memset (node, 0, sizeof(AltNode));
 	return node;
 }
 
 static void engine_cb_level(AltState *st, int delta) {
 	printf ("%d ", st->level);
-	PRINTLEVEL
-	if (delta>0) printf("{\n");
+	PRINTLEVEL;
+	if (delta>0) printf ("{\n");
 	else printf("}\n");
 }
 
 static void engine_cb_word(AltState *st) {
 	AltTree *at = (AltTree *) st->user;
-//if (at->lastlevel > st->level) { printf("left\n"); } else
-if (at->lastlevel < st->level) { printf("->\n");
-} else printf("-v\n");
+	//if (at->lastlevel > st->level) { printf("left\n"); } else
+	//if (at->lastlevel < st->level) printf("->\n"); else printf("-v\n");
 	printf ("%d ", st->level);
 	PRINTLEVEL;
 	printf ("'%s'\n", st->str);
 	at->lastlevel = st->level;
-#if old
-	AltNode *node;
-	st->str[st->stridx] = 0;
-	printf ("%d (%s)\n", st->level, st->str);
-	node = &at->tree[at->count[st->level]][st->level];
-	node->str = strdup (st->str);
-	at->count[st->level]++;
-#endif
 }
 
 void alt_tree(AltState *st) {

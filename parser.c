@@ -34,16 +34,21 @@ int parse_char(AltState *st, char ch) {
 			break;
 		case '/':
 			break;
+		case '(':
 		case '{':
-			if (st->stridx) {// SPAGUETTI
+			if (st->stridx) { // SPAGUETTI
 				st->str[st->stridx] = 0;
 				st->cb_word (st);
 				memset(&st->str, 0, sizeof(st->str));
 				st->stridx = 0;
 			}
-			st->cb_level (st, 1);
+			st->cb_level (st, 1, ch);
+			st->levels[st->level] = ch=='('?')':'}';
 			st->level++;
+			if (st->level>ALT_MAX_LEVEL)
+				return st->cb_error (st, "Too much recursivity\n");
 			break;
+		case ')':
 		case '}':
 			if (st->stridx) { // SPAGUETTI
 				st->str[st->stridx] = 0;
@@ -52,11 +57,12 @@ int parse_char(AltState *st, char ch) {
 				st->stridx = 0;
 			}
 			st->level--;
-			if (st->level<0) {
-				st->cb_error (st, "Error: underflow\n");
-				return 0;
-			}
-			st->cb_level (st, -1);
+			if (st->level<0)
+				return st->cb_error (st, "Error: underflow\n");
+			if (st->levels[st->level] != ch)
+				return st->cb_error (st,
+					"Unexpected closing parentesis.\n");
+			st->cb_level (st, -1, ch);
 			break;
 		case '\n':
 			st->line++;
@@ -94,8 +100,8 @@ int parse_char(AltState *st, char ch) {
 			case 't': ch = '\t'; break;
 			case 'r': ch = '\r'; break;
 			case 'e': ch = '\x1b'; break;
-			default: st->cb_error(st, "Invalid escaped char '%c'\n", ch);
-				return 1;
+			default: return st->cb_error(st,
+				"Invalid escaped char '%c'\n", ch);
 			}
 			st->str[st->stridx-1] = ch;
 		} else if (ch == '"') {
@@ -122,7 +128,8 @@ int parse_fd(AltState *st, int fd) {
 	char ch;
 	do {
 		ret = read (fd, &ch, 1);
-		parse_char (st, ch);
+		if (ret>0)
+			ret = parse_char (st, ch);
 	} while (ret>0);
 	return (ret==-1);
 }

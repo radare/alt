@@ -16,8 +16,9 @@ void cb_word(AltState *st) {
 	printf("(%s)\n", st->str);
 }
 
-void cb_error(AltState *st, const char *fmt, ...) {
+int cb_error(AltState *st, const char *fmt, ...) {
 	printf("ERROR: %s\n", fmt); // TODO: use va_
+	return 0;
 }
 
 int main(int argc, char **argv) {
