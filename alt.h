@@ -1,6 +1,7 @@
 #define PRINTLEVEL(x) { int i;for(i=0;i<x;i++) printf("  "); }
 
-#define ALT_MAX_LEVEL 128
+#define ALT_MAX_LEVEL 256
+
 typedef enum {
 	MODE_PARSE,
 	MODE_COMMENT,

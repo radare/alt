@@ -17,7 +17,17 @@ void parse_pushword(AltState *st, int force) {
 	st->stridx = 0;
 }
 
+int parse_concatchar(AltState *st, char ch) {
+	st->word = 1;
+	st->str[st->stridx++] = ch;
+	if (st->stridx>=ALT_MAX_LEVEL)  {
+		printf("ST(%s)\n", st->str);
+		return st->cb_error (st, "Too long string\n");
+	}
+}
+
 int parse_char(AltState *st, char ch) {
+	int ret = 1;
 	if (ch == 0)
 		return 0;
 
@@ -31,6 +41,7 @@ int parse_char(AltState *st, char ch) {
 	case MODE_PARSE:
 		switch (ch) {
 		case '"':
+		//case '\'':
 			if (st->lastchar == '\\')
 				st->str[st->stridx++] = ch;
 			else st->mode = MODE_STRING;
@@ -43,16 +54,24 @@ int parse_char(AltState *st, char ch) {
 				st->mode = MODE_COMMENT;
 			break;
 		case '/':
+			if (st->lastchar == '/')
+				st->skipuntil = '\n';
 			break;
+		case '[':
 		case '(':
 		case '{':
 			parse_pushword (st, 1);
 			st->cb_level (st, 1, ch);
-			st->levels[st->level] = ch=='('?')':'}';
+			switch(ch) {
+			case '{': st->levels[st->level] = '}'; break;
+			case '(': st->levels[st->level] = ')'; break;
+			case '[': st->levels[st->level] = ']'; break;
+			}
 			st->level++;
 			if (st->level>ALT_MAX_LEVEL)
 				return st->cb_error (st, "Too much recursivity\n");
 			break;
+		case ']':
 		case ')':
 		case '}':
 			parse_pushword(st, 0);
@@ -69,15 +88,14 @@ int parse_char(AltState *st, char ch) {
 		case ' ':
 		case ',':
 		case ';':
+		case ':':
+		//case '\'':
 		case '\t':
 		case '\r':
 			parse_pushword (st, 0);
 			break;
 		default:
-			st->word = 1;
-			st->str[st->stridx++] = ch;
-			if (st->stridx>ALT_MAX_LEVEL)
-				return st->cb_error (st, "Too long string\n");
+			parse_concatchar(st, ch);
 			break;
 		}
 		break;
@@ -98,8 +116,10 @@ int parse_char(AltState *st, char ch) {
 			case 't': ch = '\t'; break;
 			case 'r': ch = '\r'; break;
 			case 'e': ch = '\x1b'; break;
-			default: return st->cb_error(st,
-				"Invalid escaped char '%c'\n", ch);
+			case '\\': ch = '\\'; break;
+			//case '\'': ch = '\''; break;
+			default: //return st->cb_error(st,
+				printf("Invalid escaped char '%c'\n", ch);
 			}
 			st->str[st->stridx-1] = ch;
 		} else if (ch == '"') {
@@ -107,12 +127,12 @@ int parse_char(AltState *st, char ch) {
 			st->cb_word (st);
 			st->stridx = 0;
 			st->mode = MODE_PARSE;
-		} else st->str[st->stridx++] = ch;
+		} else ret = parse_concatchar(st, ch);
 		break;
 	}
 
 	st->lastchar = ch;
-	return 1;
+	return ret;
 }
 
 int parse_str(AltState *st, char *str) {

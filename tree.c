@@ -26,7 +26,7 @@ typedef struct AltTree {
 
 static AltNode *alt_node_new() {
 	AltNode *node = (AltNode*) malloc (sizeof(AltNode));
-	memset (node, 0, sizeof(AltNode));
+	memset (node, 0, sizeof (AltNode));
 	return node;
 }
 
@@ -43,6 +43,7 @@ static void engine_cb_word(AltState *st) {
 
 	if (at->laststr && !*st->str && !*at->laststr)
 		return;
+
 	node->str = strdup(st->str);
 	at->laststr = node->str;
 	if (at->root == NULL)  /* define root node */
@@ -62,7 +63,7 @@ static void engine_cb_word(AltState *st) {
 	} 
 
 	printf ("%d ", st->level);
-	PRINTLEVEL(st->level);
+	PRINTLEVEL (st->level);
 	printf ("'%s'\n", st->str);
 	at->lastlevel = st->level;
 }
@@ -74,7 +75,7 @@ void alt_tree_free(AltState *st) {
 
 static void _alt_tree_walk(AltNode *node) {
 	if (node) {
-		PRINTLEVEL(node->level);
+		PRINTLEVEL (node->level);
 		printf(" - %d : (%s)\n", node->level, node->str);
 		_alt_tree_walk (node->right);
 		_alt_tree_walk (node->down);
@@ -86,7 +87,7 @@ void alt_tree_walk(AltState *st) {
 	AltNode *node = at->root;
 	printf ("WALK NODES:\n");
 	while (node) {
-		printf (" = %d : %s\n", node->level, node->str);
+		printf (" = %d : (%s)\n", node->level, node->str);
 		_alt_tree_walk (node->right);
 		node = node->down;
 	}
@@ -96,7 +97,7 @@ AltNode* alt_tree_resolve(AltState *st, const char *name) {
 	AltTree *at = (AltTree*) st->user;
 	AltNode *node = at->root;
 	while (node) {
-		if (!strcmp(node->str, name))
+		if (!strcmp (node->str, name))
 			return node;
 		node = node->down;
 	}
@@ -104,7 +105,7 @@ AltNode* alt_tree_resolve(AltState *st, const char *name) {
 }
 
 void alt_tree(AltState *st) {
-	AltTree *at = (AltTree*) malloc(sizeof(AltTree));
+	AltTree *at = (AltTree*) malloc (sizeof(AltTree));
 	at->depth[0] = at->cur = at->root = 0;
 	st->user = (void *) at;
 	st->cb_word = engine_cb_word;
