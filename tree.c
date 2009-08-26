@@ -39,10 +39,11 @@ static void engine_cb_level(AltState *st, int delta, char ch) {
 
 static void engine_cb_word(AltState *st) {
 	AltTree *at = (AltTree *) st->user;
-	AltNode *node = alt_node_new ();
+	AltNode *node;
 
 	if (at->laststr && !*st->str && !*at->laststr)
 		return;
+	node = alt_node_new ();
 
 	node->str = strdup(st->str);
 	at->laststr = node->str;

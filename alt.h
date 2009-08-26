@@ -15,7 +15,9 @@ typedef struct AltState {
 	int level;
 	int levels[ALT_MAX_LEVEL];
 	int lastchar;
-	int skipuntil;
+	char skipuntil;
+	char endch;
+	char curchar;
 	char str[ALT_MAX_LEVEL];
 	int stridx;
 	void (*cb_word)(struct AltState *st);

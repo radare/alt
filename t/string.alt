@@ -1,0 +1,18 @@
+one { "\n" }
+two { "\t" }
+tri { '\'' }
+qua { '\t' }
+
+	switch (st->mode) {
+	case MODE_PARSE:
+		switch (ch) {
+		case '"':
+		case '\'':
+			if (st->lastchar == '\\')
+				st->str[st->stridx++] = ch;
+			else st->mode = MODE_STRING;
+			st->endch = ch;
+			break;
+		}
+	}
+END { DOCUMENT }

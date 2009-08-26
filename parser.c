@@ -9,7 +9,6 @@
 void parse_pushword(AltState *st, int force) {
 	if (!force && st->stridx == 0) // XXX CONFLICTIVE
 		return;
-//printf("lc(%c)\n", st->lastchar);
 	//printf("LEVELS(%d)\n", st->levels[st->level]);
 	st->str[st->stridx] = 0;
 	st->cb_word (st);
@@ -24,6 +23,7 @@ int parse_concatchar(AltState *st, char ch) {
 		printf("ST(%s)\n", st->str);
 		return st->cb_error (st, "Too long string\n");
 	}
+	return 1; // return 0 makes it fail
 }
 
 int parse_char(AltState *st, char ch) {
@@ -37,14 +37,16 @@ int parse_char(AltState *st, char ch) {
 		else return 1;
 	}
 
+	st->curchar = ch;
 	switch (st->mode) {
 	case MODE_PARSE:
 		switch (ch) {
 		case '"':
-		//case '\'':
+		case '\'':
 			if (st->lastchar == '\\')
 				st->str[st->stridx++] = ch;
 			else st->mode = MODE_STRING;
+			st->endch = ch;
 			break;
 		case '#':
 			st->skipuntil = '\n';
@@ -74,7 +76,7 @@ int parse_char(AltState *st, char ch) {
 		case ']':
 		case ')':
 		case '}':
-			parse_pushword(st, 0);
+			parse_pushword (st, 0);
 			st->level--;
 			if (st->level<0)
 				return st->cb_error (st, "Level underflow\n");
@@ -95,7 +97,7 @@ int parse_char(AltState *st, char ch) {
 			parse_pushword (st, 0);
 			break;
 		default:
-			parse_concatchar(st, ch);
+			parse_concatchar (st, ch);
 			break;
 		}
 		break;
@@ -116,13 +118,15 @@ int parse_char(AltState *st, char ch) {
 			case 't': ch = '\t'; break;
 			case 'r': ch = '\r'; break;
 			case 'e': ch = '\x1b'; break;
+			case 'x': ch = 'x'; break; // TODO: fix support for binary stuff
 			case '\\': ch = '\\'; break;
-			//case '\'': ch = '\''; break;
+			case '\'': ch = '\''; break;
 			default: //return st->cb_error(st,
 				printf("Invalid escaped char '%c'\n", ch);
 			}
 			st->str[st->stridx-1] = ch;
-		} else if (ch == '"') {
+			if (ch == '\\') ch = 0;
+		} else if (ch == st->endch) {
 			st->str[st->stridx] = 0;
 			st->cb_word (st);
 			st->stridx = 0;
@@ -130,7 +134,6 @@ int parse_char(AltState *st, char ch) {
 		} else ret = parse_concatchar(st, ch);
 		break;
 	}
-
 	st->lastchar = ch;
 	return ret;
 }
