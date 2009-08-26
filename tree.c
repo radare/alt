@@ -57,7 +57,8 @@ static void engine_cb_word(AltState *st) {
 		at->cur = node;
 	} else {
 		/* add node at same nest level */
-		at->cur->down = node;
+		if (node != at->root) // do not infinite loop when only one node
+			at->cur->down = node;
 		node->up = at->cur;
 		node->level = st->level;
 		at->cur = node;

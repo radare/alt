@@ -121,6 +121,7 @@ int parse_char(AltState *st, char ch) {
 			case 'x': ch = 'x'; break; // TODO: fix support for binary stuff
 			case '\\': ch = '\\'; break;
 			case '\'': ch = '\''; break;
+			case '\"': ch = '\"'; break;
 			default: //return st->cb_error(st,
 				printf("Invalid escaped char '%c'\n", ch);
 			}
