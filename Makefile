@@ -1,11 +1,11 @@
 CFLAGS+=-Wall -g
-OBJ=main.o parser.o tree.o
+OBJ=main.o parser.o tree.o script.o
 BIN=alt
 
 all: ${OBJ}
 	${CC} -o ${BIN} ${OBJ}
 	#gdb --args ./${BIN} test.alt
-	./${BIN} t/test.alt
+	./${BIN} t/hello.alt
 	#./${BIN} t/hello.alt
 
 loc:

@@ -1,4 +1,19 @@
+/*
 main (int argc, char argv) {
   .printf("Hello World\n");
 }
-main(){}{.printf("Hello World\n");}
+*/
+
+ListOfCommands {
+  'echo one'
+  'echo two'
+}
+
+main {
+  foo = "this is new";
+  .printf("Hello World\n" "coz" "this\n");
+  .system("echo food $foo");
+  .system ListOfCommands
+  .printf("---\n");
+  .exit(0);
+}

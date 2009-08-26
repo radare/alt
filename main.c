@@ -34,6 +34,9 @@ int main(int argc, char **argv) {
 	if (argc>1) ret = parse_file (&st, argv[1]);
 	else ret = parse_fd (&st, 0);
 	if (ret) return ret;
-	alt_tree_walk (&st);
+
+//	alt_tree_walk (&st);
+	alt_script(&st);
+
 	return 0;
 }

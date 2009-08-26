@@ -1,5 +1,28 @@
 #define PRINTLEVEL(x) { int i;for(i=0;i<x;i++) printf("  "); }
 
+#define DEBUG 0
+
+/* tree */
+#define TREE_DEPTH 32
+
+typedef struct AltNode {
+	char *str;
+	int level;
+	struct AltNode *up;
+	struct AltNode *down;
+	struct AltNode *right;
+	struct AltNode *left;
+} AltNode;
+
+typedef struct AltTree {
+	AltNode *root;
+	AltNode *cur;
+	AltNode *depth[TREE_DEPTH];
+	int lastlevel;
+	char *laststr;
+} AltTree;
+
+/* parser */
 #define ALT_MAX_LEVEL 256
 
 typedef enum {
@@ -26,7 +49,6 @@ typedef struct AltState {
 	void *user;
 } AltState;
 
-
 int parse_char(AltState *st, char ch);
 int parse_str(AltState *st, char *str);
 int parse_fd(AltState *st, int fd);
@@ -34,3 +56,6 @@ int parse_file(AltState *st, const char *file);
 
 void alt_tree(AltState *st);
 void alt_tree_walk(AltState *st);
+AltNode* alt_tree_resolve(AltState *st, const char *name);
+void alt_tree_walk(AltState *st);
+AltNode *alt_tree_child(AltNode *node);

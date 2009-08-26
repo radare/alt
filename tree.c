@@ -5,25 +5,6 @@
 #include <stdlib.h>
 #include "alt.h"
 
-#define TREE_DEPTH 32
-
-typedef struct AltNode {
-	char *str;
-	int level;
-	struct AltNode *up;
-	struct AltNode *down;
-	struct AltNode *right;
-	struct AltNode *left;
-} AltNode;
-
-typedef struct AltTree {
-	AltNode *root;
-	AltNode *cur;
-	AltNode *depth[TREE_DEPTH];
-	int lastlevel;
-	char *laststr;
-} AltTree;
-
 static AltNode *alt_node_new() {
 	AltNode *node = (AltNode*) malloc (sizeof(AltNode));
 	memset (node, 0, sizeof (AltNode));
@@ -63,15 +44,16 @@ static void engine_cb_word(AltState *st) {
 		node->level = st->level;
 		at->cur = node;
 	} 
-
+#if DEBUG
 	printf ("%d ", st->level);
 	PRINTLEVEL (st->level);
 	printf ("'%s'\n", st->str);
+#endif
 	at->lastlevel = st->level;
 }
 
 void alt_tree_free(AltState *st) {
-	AltTree *at = (AltTree*) st->user;
+	//AltTree *at = (AltTree*) st->user;
 	// TODO: recursive free
 }
 
@@ -82,6 +64,17 @@ static void _alt_tree_walk(AltNode *node) {
 		_alt_tree_walk (node->right);
 		_alt_tree_walk (node->down);
 	}
+}
+
+AltNode *alt_tree_child(AltNode *node) {
+	if (node == NULL)
+		return NULL;
+	if (node->right != NULL)
+		return node->right;
+	node = node->down;
+	if (node && !*node->str)
+		return node->right;
+	return node;
 }
 
 void alt_tree_walk(AltState *st) {
