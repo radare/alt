@@ -5,7 +5,8 @@ BIN=alt
 all: ${OBJ}
 	${CC} -o ${BIN} ${OBJ}
 	#gdb --args ./${BIN} test.alt
-	./${BIN} t/hello.alt
+	./${BIN} t/test.alt
+	#./${BIN} t/hello.alt
 
 loc:
 	@cat *.c *.h | wc -l

@@ -21,6 +21,7 @@ typedef struct AltTree {
 	AltNode *cur;
 	AltNode *depth[TREE_DEPTH];
 	int lastlevel;
+	char *laststr;
 } AltTree;
 
 static AltNode *alt_node_new() {
@@ -40,22 +41,25 @@ static void engine_cb_word(AltState *st) {
 	AltTree *at = (AltTree *) st->user;
 	AltNode *node = alt_node_new ();
 
+	if (at->laststr && !*st->str && !*at->laststr)
+		return;
 	node->str = strdup(st->str);
-	if (at->root != NULL) { /* define root node */
-		if (at->lastlevel < st->level) {
-			/* set child */
-			at->cur->right = node;
-			node->left = at->cur;
-			at->cur = node;
-			node->level = st->level;
-		} else {
-			/* add node at same nest level */
-			at->cur->down = node;
-			node->up = at->cur;
-			at->cur = node;
-			node->level = st->level;
-		}
-	} else at->root = at->depth[0] = at->cur = node;
+	at->laststr = node->str;
+	if (at->root == NULL)  /* define root node */
+		at->root = at->depth[0] = at->cur = node;
+	if (at->lastlevel < st->level) {
+		/* set child */
+		at->cur->right = node;
+		node->left = at->cur;
+		node->level = st->level;
+		at->cur = node;
+	} else {
+		/* add node at same nest level */
+		at->cur->down = node;
+		node->up = at->cur;
+		node->level = st->level;
+		at->cur = node;
+	} 
 
 	printf ("%d ", st->level);
 	PRINTLEVEL(st->level);

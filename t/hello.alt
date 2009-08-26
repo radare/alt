@@ -1,2 +1,4 @@
-main {.printf("Hello World\n");}
-main{.printf("Hello World\n");}
+main (int argc, char argv) {
+  .printf("Hello World\n");
+}
+main(){}{.printf("Hello World\n");}

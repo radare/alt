@@ -6,9 +6,10 @@
 #include <unistd.h>
 #include "alt.h"
 
-void parse_pushword(AltState *st) {
-	if (st->stridx == 0) // XXX CONFLICTIVE
+void parse_pushword(AltState *st, int force) {
+	if (!force && st->stridx == 0) // XXX CONFLICTIVE
 		return;
+//printf("lc(%c)\n", st->lastchar);
 	//printf("LEVELS(%d)\n", st->levels[st->level]);
 	st->str[st->stridx] = 0;
 	st->cb_word (st);
@@ -45,7 +46,7 @@ int parse_char(AltState *st, char ch) {
 			break;
 		case '(':
 		case '{':
-			parse_pushword(st);
+			parse_pushword (st, 1);
 			st->cb_level (st, 1, ch);
 			st->levels[st->level] = ch=='('?')':'}';
 			st->level++;
@@ -54,7 +55,7 @@ int parse_char(AltState *st, char ch) {
 			break;
 		case ')':
 		case '}':
-			parse_pushword(st);
+			parse_pushword(st, 0);
 			st->level--;
 			if (st->level<0)
 				return st->cb_error (st, "Level underflow\n");
@@ -70,7 +71,7 @@ int parse_char(AltState *st, char ch) {
 		case ';':
 		case '\t':
 		case '\r':
-			parse_pushword (st);
+			parse_pushword (st, 0);
 			break;
 		default:
 			st->word = 1;
