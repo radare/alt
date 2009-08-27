@@ -15,7 +15,25 @@ static void engine_cb_level(AltState *st, int delta, char ch) {
 	AltTree *at = (AltTree *) st->user;
 	if (delta>0) at->depth[st->level] = at->cur;
 	else at->cur = at->depth[st->level];
-	//printf ("%d ", st->level); PRINTLEVEL(st->level); if (delta>0) printf ("{\n"); else printf("}\n");
+	if (st->debug) {
+		printf ("%d ", st->level);
+		PRINTLEVEL(st->level);
+		if (delta>0) printf ("{\n");
+		else printf("}\n");
+	}
+}
+
+static int _word_type(AltState *st) {
+	int type = TYPE_WORD;
+	if (st->mode == MODE_STRING) {
+		type = TYPE_STRING;
+	} else
+	if (*st->str>='0' && *st->str<='9') {
+		if (strchr(st->str, '.'))
+			type = TYPE_FLOAT;
+		else type = TYPE_INTEGER;
+	}
+	return type;
 }
 
 static void engine_cb_word(AltState *st) {
@@ -26,7 +44,8 @@ static void engine_cb_word(AltState *st) {
 		return;
 	node = alt_node_new ();
 
-	node->str = strdup(st->str);
+	node->type = _word_type (st);
+	node->str = strdup (st->str);
 	at->laststr = node->str;
 	if (at->root == NULL)  /* define root node */
 		at->root = at->depth[0] = at->cur = node;
@@ -44,11 +63,11 @@ static void engine_cb_word(AltState *st) {
 		node->level = st->level;
 		at->cur = node;
 	} 
-#if DEBUG
-	printf ("%d ", st->level);
-	PRINTLEVEL (st->level);
-	printf ("'%s'\n", st->str);
-#endif
+	if (st->debug) {
+		printf ("%d ", st->level);
+		PRINTLEVEL (st->level);
+		printf ("'%s'\n", st->str);
+	}
 	at->lastlevel = st->level;
 }
 
@@ -99,10 +118,11 @@ AltNode* alt_tree_resolve(AltState *st, const char *name) {
 	return NULL;
 }
 
-void alt_tree(AltState *st) {
+void alt_tree(AltState *st, int debug) {
 	AltTree *at = (AltTree*) malloc (sizeof(AltTree));
 	at->depth[0] = at->cur = at->root = 0;
 	st->user = (void *) at;
+	st->debug = debug;
 	st->cb_word = engine_cb_word;
 	st->cb_level = engine_cb_level;
 }

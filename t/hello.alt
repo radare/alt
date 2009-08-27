@@ -10,10 +10,10 @@ ListOfCommands {
 }
 
 main {
-  foo = "this is new";
-  .printf("Hello World\n" "coz" "this\n");
-  .system("echo food $foo");
-  .system ListOfCommands
-  .printf("---\n");
-  .exit(0);
+  $foo = "this is new";
+  printf ("Hello World\n" "coz" "this\n");
+  system ("echo food $foo");
+  system { ListOfCommands }
+  printf ("---\n");
+  exit(0);
 }

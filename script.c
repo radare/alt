@@ -35,56 +35,58 @@ int alt_script_run(AltState *st, AltNode *node) {
 	AltNode *onode = node;
 	if (node == NULL)
 		return 1;
-	if (*node->str=='.') {
-		if (!strcmp(node->str+1, "printf")) {
+	if (!*node->str) {
+		// ignore
+	} else
+	if (*node->str=='$') {
+		// variable
+		if (node->down && node->down->down && alt_word_is_assign(node->down->str)) {
+			//printf("ASSIGN '%s' = '%s'\n", node->str, node->down->down->str);
+			setenv(node->str, node->down->down->str, 1);
+			onode = node->down->down;
+		}
+	} else {
+		if (!strcmp(node->str, "printf")) {
 			node = alt_tree_child (node);
 			while (node) {
 				printf (node->str);
 				node = node->down;
 			}
 		} else
-		if (!strcmp(node->str+1, "system")) {
+		if (!strcmp(node->str, "system")) {
 			if (node->right)
 				node = alt_tree_child (node);
 			else {
 				onode = node->down;
 				node = node->down;
-				node = alt_tree_resolve(st, node->str);
+				node = alt_tree_resolve (st, node->str);
 				if (node)
-					node = alt_tree_child(node);
+					node = alt_tree_child (node);
 			}
 			while (node) {
 				system (node->str);
 				node = node->down;
 			}
 		} else
-		if (!strcmp(node->str+1, "exit")) {
+		if (!strcmp(node->str, "exit")) {
 			node = alt_tree_child (node);
 			if (node) exit (atoi(node->str));
-		}
-	} else {
-		if (node->down && node->down->down && alt_word_is_assign(node->down->str)) {
-			//printf("ASSIGN '%s' = '%s'\n", node->str, node->down->down->str);
-			setenv(node->str, node->down->down->str, 1);
-			onode = node->down->down;
-		} else
-		if (*node->str)
-			printf("UNKNOWN (%s)\n", node->str);
+		} else printf ("UNKNOWN (%s)\n", node->str);
 	}
-	return alt_script_run(st, onode->down);
+	return alt_script_run (st, onode->down);
 }
 
 int alt_script(AltState *st) {
 	AltTree *at = st->user;	
 	AltNode *node;
 	if (at == NULL)
-		return st->cb_error(st, "No tree found.");
+		return st->cb_error (st, "No tree found.");
 
-	node = alt_tree_resolve(st, "main");
+	node = alt_tree_resolve (st, "main");
 	if (node == NULL)
-		return st->cb_error(st, "Cannot find 'main'.");
+		return st->cb_error (st, "Cannot find 'main'.");
 
 	//alt_tree_walk(st);
-	node = alt_tree_child(node);
-	return alt_script_run(st, node);
+	node = alt_tree_child (node);
+	return alt_script_run (st, node);
 }

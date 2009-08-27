@@ -5,9 +5,23 @@
 /* tree */
 #define TREE_DEPTH 32
 
+typedef enum {
+	TYPE_WORD,    // foo
+	TYPE_STRING,  // "foo"
+	TYPE_INTEGER, // 123
+	TYPE_FLOAT,   // 493.22
+} WordType;
+
+typedef enum {
+	KEY_BLOCK, // {
+	KEY_LIST,  // (
+	KEY_INDEX, // [
+} KeyType;
+
 typedef struct AltNode {
 	char *str;
 	int level;
+	int type;
 	struct AltNode *up;
 	struct AltNode *down;
 	struct AltNode *right;
@@ -33,6 +47,7 @@ typedef enum {
 
 typedef struct AltState {
 	AltMode mode;
+	int debug;
 	int word;
 	int line;
 	int level;
@@ -54,8 +69,10 @@ int parse_str(AltState *st, char *str);
 int parse_fd(AltState *st, int fd);
 int parse_file(AltState *st, const char *file);
 
-void alt_tree(AltState *st);
+void alt_tree(AltState *st, int debug);
 void alt_tree_walk(AltState *st);
 AltNode* alt_tree_resolve(AltState *st, const char *name);
 void alt_tree_walk(AltState *st);
 AltNode *alt_tree_child(AltNode *node);
+
+int alt_script(AltState *st);
