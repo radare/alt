@@ -6,6 +6,12 @@
 #include <unistd.h>
 #include "alt.h"
 
+static int parse_is_operator(char ch) {
+	if (ch=='*') return 1;
+	return (ch=='+'||ch=='-'||ch=='&'||ch=='='||ch=='&'||
+		ch=='|'||ch=='^'||ch=='/'||ch=='%'||ch=='*');
+}
+
 void parse_pushword(AltState *st, int force) {
 	if (!force && st->stridx == 0) // XXX CONFLICTIVE
 		return;
@@ -51,14 +57,6 @@ int parse_char(AltState *st, char ch) {
 		case '#':
 			st->skipuntil = '\n';
 			break;
-		case '*':
-			if (st->lastchar == '/')
-				st->mode = MODE_COMMENT;
-			break;
-		case '/':
-			if (st->lastchar == '/')
-				st->skipuntil = '\n';
-			break;
 		case '[':
 		case '(':
 		case '{':
@@ -97,9 +95,33 @@ int parse_char(AltState *st, char ch) {
 			parse_pushword (st, 0);
 			break;
 		default:
-			parse_concatchar (st, ch);
+			if (st->lastchar == '/') {
+				switch(ch) {
+				case '*':
+					st->mode = MODE_COMMENT;
+					break;
+				case '/':
+					st->skipuntil = '\n';
+					break;
+			} else {
+				if (parse_is_operator (ch)) {
+					parse_pushword (st, 0);
+					st->mode = MODE_OPERATOR;
+					return parse_char (st, ch);
+					//st->str[st->stridx++] = ch;
+				} else parse_concatchar (st, ch);
+			}
 			break;
 		}
+		break;
+	case MODE_OPERATOR:
+		if (!parse_is_operator(ch)) {
+			st->mode = MODE_PARSE;
+			parse_pushword (st, 0);
+			// XXX: check if return here is ok
+			return parse_char (st, ch);
+		//	st->str[st->stridx++] = ch;
+		} else st->str[st->stridx++] = ch; //return parse_char (st, ch);
 		break;
 	case MODE_COMMENT:
 		switch (ch) {
@@ -128,9 +150,7 @@ int parse_char(AltState *st, char ch) {
 			st->str[st->stridx-1] = ch;
 			if (ch == '\\') ch = 0;
 		} else if (ch == st->endch) {
-			st->str[st->stridx] = 0;
-			st->cb_word (st);
-			st->stridx = 0;
+			parse_pushword (st, 0);
 			st->mode = MODE_PARSE;
 		} else ret = parse_concatchar(st, ch);
 		break;

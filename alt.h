@@ -41,6 +41,7 @@ typedef struct AltTree {
 
 typedef enum {
 	MODE_PARSE,
+	MODE_OPERATOR,
 	MODE_COMMENT,
 	MODE_STRING,
 } AltMode;

@@ -10,7 +10,7 @@ ListOfCommands {
 }
 
 main {
-  $foo = "this is new";
+  $foo ="this is new";
   printf ("Hello World\n" "coz" "this\n");
   system ("echo food $foo");
   system { ListOfCommands }

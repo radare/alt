@@ -1,0 +1,11 @@
+main {
+  foo= 3
+  bar =4
+  bar -= 4
+  bar-=4
+  cow==-1
+  foo+=bar
+/* foo */
+a *= b
+a /= b
+}
