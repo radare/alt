@@ -7,9 +7,8 @@
 #include "alt.h"
 
 static int parse_is_operator(char ch) {
-	if (ch=='*') return 1;
-	return (ch=='+'||ch=='-'||ch=='&'||ch=='='||ch=='&'||
-		ch=='|'||ch=='^'||ch=='/'||ch=='%'||ch=='*');
+	return (ch=='+'||ch=='-'||ch=='&'||ch=='='||ch=='&'||ch=='~'||ch=='>'||
+		ch=='|'||ch=='^'||ch=='/'||ch=='%'||ch=='*'||ch=='!'||ch=='<');
 }
 
 void parse_pushword(AltState *st, int force) {
@@ -23,7 +22,6 @@ void parse_pushword(AltState *st, int force) {
 }
 
 int parse_concatchar(AltState *st, char ch) {
-	st->word = 1;
 	st->str[st->stridx++] = ch;
 	if (st->stridx>=ALT_MAX_LEVEL)  {
 		printf("ST(%s)\n", st->str);
@@ -50,7 +48,8 @@ int parse_char(AltState *st, char ch) {
 		case '"':
 		case '\'':
 			if (st->lastchar == '\\')
-				st->str[st->stridx++] = ch;
+				parse_concatchar(st, ch);
+				//st->str[st->stridx++] = ch;
 			else st->mode = MODE_STRING;
 			st->endch = ch;
 			break;
@@ -103,6 +102,7 @@ int parse_char(AltState *st, char ch) {
 				case '/':
 					st->skipuntil = '\n';
 					break;
+				}
 			} else {
 				if (parse_is_operator (ch)) {
 					parse_pushword (st, 0);
@@ -115,7 +115,20 @@ int parse_char(AltState *st, char ch) {
 		}
 		break;
 	case MODE_OPERATOR:
-		if (!parse_is_operator(ch)) {
+		if (st->lastchar == '/') {
+			switch(ch) {
+			case '*':
+				st->mode = MODE_COMMENT;
+				st->stridx = 0;
+				break;
+			case '/':
+				st->skipuntil = '\n';
+				st->mode = MODE_COMMENT;
+				st->stridx = 0;
+				break;
+			}
+		}
+		if (st->mode != MODE_OPERATOR || !parse_is_operator(ch)) {
 			st->mode = MODE_PARSE;
 			parse_pushword (st, 0);
 			// XXX: check if return here is ok
@@ -129,6 +142,7 @@ int parse_char(AltState *st, char ch) {
 			if (st->lastchar == '*') { // */ //
 				st->mode = MODE_PARSE;
 				st->stridx = 0;
+				ch = 0; // workaround for default->lastchar==/
 			}
 			break;
 		}

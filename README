@@ -74,3 +74,13 @@ ElementModule {
 }
 
 foo = Thread { ElementModule() }
+
+/*
+Word types:
+w = word
+s = string
+i = integer
+f = float
+*/
+
+: if(i){}

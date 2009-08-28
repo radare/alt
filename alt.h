@@ -49,7 +49,7 @@ typedef enum {
 typedef struct AltState {
 	AltMode mode;
 	int debug;
-	int word;
+	//int word;
 	int line;
 	int level;
 	int levels[ALT_MAX_LEVEL];

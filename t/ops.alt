@@ -1,10 +1,14 @@
 main {
   foo= 3
+jeje/*
   bar =4
   bar -= 4
-  bar-=4
+*/bar-=4
   cow==-1
   foo+=bar
+*/
+// jeje is new
+cow
 /* foo */
 a *= b
 a /= b
