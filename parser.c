@@ -14,7 +14,6 @@ int parse_is_operator(char ch) {
 void parse_pushword(AltState *st, int force) {
 	if (!force && st->stridx == 0) // XXX CONFLICTIVE
 		return;
-	//printf("LEVELS(%d)\n", st->levels[st->level]);
 	st->str[st->stridx] = 0;
 	st->cb_word (st);
 	memset(&st->str, 0, sizeof(st->str));
@@ -23,10 +22,8 @@ void parse_pushword(AltState *st, int force) {
 
 int parse_concatchar(AltState *st, char ch) {
 	st->str[st->stridx++] = ch;
-	if (st->stridx>=ALT_MAX_LEVEL)  {
-		printf("ST(%s)\n", st->str);
-		return st->cb_error (st, "Too long string\n");
-	}
+	if (st->stridx>=ALT_MAX_LEVEL)
+		return st->cb_error (st, "Too long string"); //, st->str);
 	return 1; // return 0 makes it fail
 }
 
@@ -40,7 +37,6 @@ int parse_char(AltState *st, char ch) {
 			st->skipuntil = 0;
 		else return 1;
 	}
-
 	st->curchar = ch;
 	switch (st->mode) {
 	case MODE_PARSE:
@@ -67,7 +63,7 @@ int parse_char(AltState *st, char ch) {
 			}
 			st->level++;
 			if (st->level>ALT_MAX_LEVEL)
-				return st->cb_error (st, "Too much recursivity\n");
+				return st->cb_error (st, "Too much recursivity");
 			break;
 		case ']':
 		case ')':
@@ -107,7 +103,6 @@ int parse_char(AltState *st, char ch) {
 					parse_pushword (st, 0);
 					st->mode = MODE_OPERATOR; // XXX dupped
 					return parse_char (st, ch);
-					//st->str[st->stridx++] = ch;
 				} else parse_concatchar (st, ch);
 			}
 			break;
@@ -132,18 +127,13 @@ int parse_char(AltState *st, char ch) {
 			parse_pushword (st, 0);
 			// XXX: check if return here is ok
 			return parse_char (st, ch);
-		//	st->str[st->stridx++] = ch;
 		} else st->str[st->stridx++] = ch; //return parse_char (st, ch);
 		break;
 	case MODE_COMMENT:
-		switch (ch) {
-		case '/':
-			if (st->lastchar == '*') { // */ //
-				st->mode = MODE_PARSE;
-				st->stridx = 0;
-				ch = 0; // workaround for default->lastchar==/
-			}
-			break;
+		if (ch == '/' && st->lastchar == '*') {
+			st->mode = MODE_PARSE;
+			st->stridx = 0;
+			ch = 0; // workaround for default->lastchar==/
 		}
 		break;
 	case MODE_STRING:
@@ -165,7 +155,7 @@ int parse_char(AltState *st, char ch) {
 		} else if (ch == st->endch) {
 			parse_pushword (st, 0);
 			st->mode = MODE_PARSE;
-		} else ret = parse_concatchar(st, ch);
+		} else ret = parse_concatchar (st, ch);
 		break;
 	}
 	st->lastchar = ch;
@@ -180,13 +170,12 @@ int parse_str(AltState *st, char *str) {
 
 int parse_fd(AltState *st, int fd) {
 	int ret, i;
-	char ch[1024];
+	char buf[1024];
 	do {
-		ret = read (fd, &ch, 1024);
-		for(i=0;i<ret;i++) {
-			if (!parse_char (st, ch[i]))
+		ret = read (fd, buf, 1024);
+		for (i=0;i<ret;i++)
+			if (!parse_char (st, buf[i]))
 				return 0;
-		}
 	} while (ret>0);
 	return (ret==-1);
 }

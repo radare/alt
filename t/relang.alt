@@ -1,0 +1,35 @@
+==(i,i){
+  "mov %eax, " $0
+  "sub %eax, " $1
+}
+
+!=(i,i){
+  "mov %eax, " $0
+  "cmp %eax, " $1
+}
+
+var(w) {
+  "8(%ebp)"
+}
+
+=(w,i) {
+  "mov %eax, " $1
+  "mov " var($0) ", %eax"
+}
+
+if(..){
+  "jz $e"
+  ..
+}
+
+while(..){
+  "jz $e"
+  ..
+  "jmp $b"
+}
+
+//for(... ... ...) { }
+
+if (3!=4) { // !=(3,4)) {
+  printf("Hello World\n");
+}

@@ -6,14 +6,6 @@
 #define TREE_DEPTH 32
 
 typedef enum {
-	TYPE_WORD,     // foo
-	TYPE_STRING,   // "foo"
-	TYPE_INTEGER,  // 123
-	TYPE_FLOAT,    // 493.22
-	TYPE_OPERATOR, // operator
-} WordType;
-
-typedef enum {
 	KEY_BLOCK, // {
 	KEY_LIST,  // (
 	KEY_INDEX, // [
@@ -68,7 +60,7 @@ typedef struct AltState {
 	int stridx;
 	void (*cb_word)(struct AltState *st);
 	void (*cb_level)(struct AltState *st, int delta, char ch);
-	int (*cb_error)(struct AltState *st, const char *fmt, ...);
+	int (*cb_error)(struct AltState *st, const char *str);
 	void *user;
 } AltState;
 
