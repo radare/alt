@@ -4,6 +4,31 @@ main (int argc, char argv) {
 }
 */
 
+/*
+== {
+  "push $2"
+  "push $0"
+  "call strcmp"
+}
+
+if {
+  eval($@)
+}
+
+eval {
+  ...
+  $1($0,$2)
+}
+
+for{
+ eval($0);
+}
+
+for($i=0; $i<10; $i++) {
+
+}
+*/
+
 ListOfCommands {
   'echo one'
   'echo two'

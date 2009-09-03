@@ -5,8 +5,21 @@
 #include <stdlib.h>
 #include "alt.h"
 
-static AltNode *alt_node_new() {
-	AltNode *node = (AltNode*) malloc (sizeof(AltNode));
+static inline AltNode* node_alloc(AltTree *at) {
+	//return malloc(sizeof(AltNode)); // few times slower :D
+	if (at->ncount >= ALLOC_POOL_SIZE) {
+		if (++at->npool >= ALLOC_POOL_COUNT ) {
+			printf("FAIL; Cannot allocate more memory in the pool\n");
+			exit(1);
+		}
+		at->nodes[at->npool] = malloc(sizeof(AltNode)*ALLOC_POOL_SIZE);
+		at->ncount = 0;
+	}
+	return &at->nodes[at->npool][at->ncount++];
+}
+
+static AltNode *alt_node_new(AltTree *at) {
+	AltNode *node = node_alloc (at);
 	memset (node, 0, sizeof (AltNode));
 	return node;
 }
@@ -32,7 +45,9 @@ static int _word_type(AltState *st) {
 		if (strchr(st->str, '.'))
 			type = TYPE_FLOAT;
 		else type = TYPE_INTEGER;
-	}
+	} else 
+	if (parse_is_operator(*st->str))
+		type = TYPE_OPERATOR;
 	return type;
 }
 
@@ -42,7 +57,7 @@ static void engine_cb_word(AltState *st) {
 
 	if (at->laststr && !*st->str && !*at->laststr)
 		return;
-	node = alt_node_new ();
+	node = alt_node_new (st->user);
 
 	node->type = _word_type (st);
 	node->str = strdup (st->str);
@@ -71,15 +86,13 @@ static void engine_cb_word(AltState *st) {
 	at->lastlevel = st->level;
 }
 
-void alt_tree_free(AltState *st) {
-	//AltTree *at = (AltTree*) st->user;
-	// TODO: recursive free
-}
+//const char *nodenamez[4] = {"word", "string", "int", "float"};
+const char *nodetypez = "WSIFO";
 
 static void _alt_tree_walk(AltNode *node) {
 	if (node) {
 		PRINTLEVEL (node->level);
-		printf(" - %d : (%s)\n", node->level, node->str);
+		printf(" - %d %c : (%s)\n", node->level, nodetypez[node->type], node->str);
 		_alt_tree_walk (node->right);
 		_alt_tree_walk (node->down);
 	}
@@ -101,7 +114,7 @@ void alt_tree_walk(AltState *st) {
 	AltNode *node = at->root;
 	printf ("WALK NODES:\n");
 	while (node) {
-		printf (" = %d : (%s)\n", node->level, node->str);
+		printf (" = %d %c : (%s)\n", node->level, nodetypez[node->type], node->str);
 		_alt_tree_walk (node->right);
 		node = node->down;
 	}
@@ -121,8 +134,25 @@ AltNode* alt_tree_resolve(AltState *st, const char *name) {
 void alt_tree(AltState *st, int debug) {
 	AltTree *at = (AltTree*) malloc (sizeof(AltTree));
 	at->depth[0] = at->cur = at->root = 0;
+
+	at->npool = 0;
+	at->nodes[0] = malloc(sizeof(AltNode)*ALLOC_POOL_SIZE);
+	at->ncount = 0;
+
 	st->user = (void *) at;
 	st->debug = debug;
 	st->cb_word = engine_cb_word;
 	st->cb_level = engine_cb_level;
+}
+
+void alt_tree_free(AltState *st) {
+	int i;
+	AltTree *at;
+	if (st != NULL) {
+		at = (AltTree*) st->user;
+		for(i=0; i<at->npool; i++)
+			free (at->nodes[i]);
+		free(at);
+		st->user = NULL;
+	}
 }

@@ -6,10 +6,11 @@
 #define TREE_DEPTH 32
 
 typedef enum {
-	TYPE_WORD,    // foo
-	TYPE_STRING,  // "foo"
-	TYPE_INTEGER, // 123
-	TYPE_FLOAT,   // 493.22
+	TYPE_WORD,     // foo
+	TYPE_STRING,   // "foo"
+	TYPE_INTEGER,  // 123
+	TYPE_FLOAT,    // 493.22
+	TYPE_OPERATOR, // operator
 } WordType;
 
 typedef enum {
@@ -28,12 +29,18 @@ typedef struct AltNode {
 	struct AltNode *left;
 } AltNode;
 
+#define ALLOC_POOL_SIZE 1024
+#define ALLOC_POOL_COUNT 128
+
 typedef struct AltTree {
 	AltNode *root;
 	AltNode *cur;
 	AltNode *depth[TREE_DEPTH];
 	int lastlevel;
 	char *laststr;
+	AltNode *nodes[ALLOC_POOL_COUNT];
+	int ncount;
+	int npool;
 } AltTree;
 
 /* parser */
@@ -69,11 +76,13 @@ int parse_char(AltState *st, char ch);
 int parse_str(AltState *st, char *str);
 int parse_fd(AltState *st, int fd);
 int parse_file(AltState *st, const char *file);
+int parse_is_operator(char ch);
 
 void alt_tree(AltState *st, int debug);
 void alt_tree_walk(AltState *st);
 AltNode* alt_tree_resolve(AltState *st, const char *name);
 void alt_tree_walk(AltState *st);
 AltNode *alt_tree_child(AltNode *node);
+void alt_tree_free(AltState *st);
 
 int alt_script(AltState *st);

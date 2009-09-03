@@ -65,5 +65,7 @@ int main(int argc, char **argv) {
 	if (mode == 2)
 		alt_tree_walk (&st);
 
+	alt_tree_free(&st);
+
 	return 0;
 }

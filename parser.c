@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "alt.h"
 
-static int parse_is_operator(char ch) {
+int parse_is_operator(char ch) {
 	return (ch=='+'||ch=='-'||ch=='&'||ch=='='||ch=='&'||ch=='~'||ch=='>'||
 		ch=='|'||ch=='^'||ch=='/'||ch=='%'||ch=='*'||ch=='!'||ch=='<');
 }
@@ -49,7 +49,6 @@ int parse_char(AltState *st, char ch) {
 		case '\'':
 			if (st->lastchar == '\\')
 				parse_concatchar(st, ch);
-				//st->str[st->stridx++] = ch;
 			else st->mode = MODE_STRING;
 			st->endch = ch;
 			break;
@@ -106,7 +105,7 @@ int parse_char(AltState *st, char ch) {
 			} else {
 				if (parse_is_operator (ch)) {
 					parse_pushword (st, 0);
-					st->mode = MODE_OPERATOR;
+					st->mode = MODE_OPERATOR; // XXX dupped
 					return parse_char (st, ch);
 					//st->str[st->stridx++] = ch;
 				} else parse_concatchar (st, ch);
@@ -180,12 +179,14 @@ int parse_str(AltState *st, char *str) {
 }
 
 int parse_fd(AltState *st, int fd) {
-	int ret;
-	char ch;
+	int ret, i;
+	char ch[1024];
 	do {
-		ret = read (fd, &ch, 1);
-		if (ret>0)
-			ret = parse_char (st, ch);
+		ret = read (fd, &ch, 1024);
+		for(i=0;i<ret;i++) {
+			if (!parse_char (st, ch[i]))
+				return 0;
+		}
 	} while (ret>0);
 	return (ret==-1);
 }

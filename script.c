@@ -54,15 +54,13 @@ int alt_script_run(AltState *st, AltNode *node) {
 			}
 		} else
 		if (!strcmp(node->str, "system")) {
-			if (node->right)
-				node = alt_tree_child (node);
-			else {
+			if (!node->right) {
 				onode = node->down;
 				node = node->down;
 				node = alt_tree_resolve (st, node->str);
 				if (node)
 					node = alt_tree_child (node);
-			}
+			} else node = alt_tree_child (node);
 			while (node) {
 				system (node->str);
 				node = node->down;
