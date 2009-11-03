@@ -46,10 +46,10 @@ int alt_script_run(AltState *st, AltNode *node) {
 			onode = node->down->down;
 		}
 	} else {
-		if (!strcmp(node->str, "printf")) {
+		if (!strcmp(node->str, "say")) {
 			node = alt_tree_child (node);
 			while (node) {
-				printf (node->str);
+				puts (node->str);
 				node = node->down;
 			}
 		} else
@@ -62,7 +62,10 @@ int alt_script_run(AltState *st, AltNode *node) {
 					node = alt_tree_child (node);
 			} else node = alt_tree_child (node);
 			while (node) {
-				system (node->str);
+				if (system (node->str) != 0) {
+					perror ("system");
+					break;
+				}
 				node = node->down;
 			}
 		} else

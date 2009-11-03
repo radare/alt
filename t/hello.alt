@@ -36,7 +36,7 @@ ListOfCommands {
 
 main {
   $foo ="this is new";
-  printf ("Hello World\n" "coz" "this\n");
+  say ("Hello World\n" "coz" "this\n");
   system ("echo food $foo");
   system { ListOfCommands }
   printf ("---\n");

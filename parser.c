@@ -16,7 +16,7 @@ void parse_pushword(AltState *st, int force) {
 		return;
 	st->str[st->stridx] = 0;
 	st->cb_word (st);
-	memset(&st->str, 0, sizeof(st->str));
+	memset (&st->str, 0, sizeof (st->str));
 	st->stridx = 0;
 }
 
@@ -44,7 +44,7 @@ int parse_char(AltState *st, char ch) {
 		case '"':
 		case '\'':
 			if (st->lastchar == '\\')
-				parse_concatchar(st, ch);
+				parse_concatchar (st, ch);
 			else st->mode = MODE_STRING;
 			st->endch = ch;
 			break;
@@ -148,7 +148,7 @@ int parse_char(AltState *st, char ch) {
 			case '\'': ch = '\''; break;
 			case '\"': ch = '\"'; break;
 			default: //return st->cb_error(st,
-				printf("Invalid escaped char '%c'\n", ch);
+				fprintf (stderr, "Invalid escaped char '%c'\n", ch);
 			}
 			st->str[st->stridx-1] = ch;
 			if (ch == '\\') ch = 0;
