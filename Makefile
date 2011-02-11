@@ -1,5 +1,6 @@
 CFLAGS+=-Wall -g -O2
 OBJ=main.o parser.o tree.o script.o
+PREFIX?=/usr
 BIN=alt
 
 all: ${OBJ}
@@ -14,6 +15,8 @@ locdiff:
 	B=`hg diff | grep -v -- '---' | grep ^- |wc -l` ; \
 	echo $$((A-B))
 
+install:
+	cp alt ${DESTDIR}${PREFIX}/bin
 
 clean:
 	rm -f ${OBJ} ${BIN}

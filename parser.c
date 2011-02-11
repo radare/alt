@@ -11,11 +11,11 @@ int parse_is_operator(char ch) {
 		ch=='|'||ch=='^'||ch=='/'||ch=='%'||ch=='*'||ch=='!'||ch=='<');
 }
 
-void parse_pushword(AltState *st) {
+void parse_pushword(AltState *st, char ch) {
 	if (st->stridx == 0 && st->mode != MODE_STRING)
 		return;
 	st->str[st->stridx] = 0;
-	st->cb_word (st);
+	st->cb_word (st, ch);
 	memset (&st->str, 0, sizeof (st->str));
 	st->stridx = 0;
 }
@@ -54,7 +54,7 @@ int parse_char(AltState *st, char ch) {
 		case '[':
 		case '(':
 		case '{':
-			parse_pushword (st);
+			parse_pushword (st, ch);
 			st->cb_level (st, 1, ch);
 			switch(ch) {
 			case '{': st->levels[st->level] = '}'; break;
@@ -68,7 +68,7 @@ int parse_char(AltState *st, char ch) {
 		case ']':
 		case ')':
 		case '}':
-			parse_pushword (st);
+			parse_pushword (st, ch);
 			st->level--;
 			if (st->level<0)
 				return st->cb_error (st, "Level underflow\n");
@@ -86,11 +86,11 @@ int parse_char(AltState *st, char ch) {
 		//case '\'':
 		case '\t':
 		case '\r':
-			parse_pushword (st);
+			parse_pushword (st, ch);
 			break;
 		default:
 			if (st->lastchar == '/') {
-				switch(ch) {
+				switch (ch) {
 				case '*':
 					st->mode = MODE_COMMENT;
 					break;
@@ -100,7 +100,7 @@ int parse_char(AltState *st, char ch) {
 				}
 			} else {
 				if (parse_is_operator (ch)) {
-					parse_pushword (st);
+					parse_pushword (st, ch);
 					st->mode = MODE_OPERATOR; // XXX dupped
 					return parse_char (st, ch);
 				} else parse_concatchar (st, ch);
@@ -122,9 +122,9 @@ int parse_char(AltState *st, char ch) {
 				break;
 			}
 		}
-		if (st->mode != MODE_OPERATOR || !parse_is_operator(ch)) {
+		if (st->mode != MODE_OPERATOR || !parse_is_operator (ch)) {
 			st->mode = MODE_PARSE;
-			parse_pushword (st);
+			parse_pushword (st, ch);
 			// XXX: check if return here is ok
 			return parse_char (st, ch);
 		} else st->str[st->stridx++] = ch; //return parse_char (st, ch);
@@ -153,7 +153,7 @@ int parse_char(AltState *st, char ch) {
 			st->str[st->stridx-1] = ch;
 			if (ch == '\\') ch = 0;
 		} else if (ch == st->endch) {
-			parse_pushword (st);
+			parse_pushword (st, ch);
 			st->mode = MODE_PARSE;
 		} else ret = parse_concatchar (st, ch);
 		break;

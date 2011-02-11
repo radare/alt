@@ -24,6 +24,8 @@ static AltNode *alt_node_new(AltTree *at) {
 }
 
 static void engine_cb_level(AltState *st, int delta, char ch) {
+// THIS CODE MAKES TREE CHOP ){ CONSTRUCTIONS
+#if 0
 	AltTree *at = (AltTree *) st->user;
 	if (delta>0) at->depth[st->level] = at->cur;
 	else at->cur = at->depth[st->level];
@@ -33,6 +35,7 @@ static void engine_cb_level(AltState *st, int delta, char ch) {
 		if (delta>0) printf ("{\n");
 		else printf ("}\n");
 	}
+#endif
 }
 
 static int _word_type(AltState *st) {
@@ -48,7 +51,7 @@ static int _word_type(AltState *st) {
 	return type;
 }
 
-static void engine_cb_word(AltState *st) {
+static void engine_cb_word(AltState *st, char ch) {
 	AltTree *at = (AltTree *) st->user;
 	AltNode *node;
 
@@ -58,6 +61,7 @@ static void engine_cb_word(AltState *st) {
 	node = alt_node_new (st->user);
 	node->type = _word_type (st);
 	node->str = strdup (st->str);
+	node->endch = ch;
 	at->laststr = node->str;
 	if (at->root == NULL)  /* define root node */
 		at->root = at->depth[0] = at->cur = node;
@@ -65,18 +69,17 @@ static void engine_cb_word(AltState *st) {
 		/* set child */
 		at->cur->right = node;
 		node->left = at->cur;
-		node->level = st->level;
-		at->cur = node;
 	} else {
 		/* add node at same nest level */
-		if (node != at->root) // do not infinite loop when only one node
+		//if (node != at->root) // do not infinite loop when only one node ???
 			at->cur->down = node;
 		node->up = at->cur;
-		node->level = st->level;
-		at->cur = node;
 	} 
+	node->level = st->level;
+	at->cur = node;
 	if (st->debug) {
-		printf ("%d ", st->level);
+		printf ("DEBUG %d %c", st->level, CHF (ch));
+		printf (" (%s) ", (at->lastlevel < st->level)? "CHILD":"SAME");
 		PRINTLEVEL (st->level);
 		printf ("'%s'\n", st->str);
 	}
@@ -86,7 +89,7 @@ static void engine_cb_word(AltState *st) {
 static void _alt_tree_walk(AltNode *node) {
 	if (node) {
 		PRINTLEVEL (node->level);
-		printf(" - %d %c : (%s)\n", node->level, node->type, node->str);
+		printf (" - %d %c : (%s) '%c'\n", node->level, node->type, node->str, CHF (node->endch));
 		_alt_tree_walk (node->right);
 		_alt_tree_walk (node->down);
 	}
