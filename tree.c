@@ -7,11 +7,11 @@
 
 static inline AltNode* node_alloc(AltTree *at) {
 	if (at->ncount >= ALLOC_POOL_SIZE) {
-		if (++at->npool >= ALLOC_POOL_COUNT ) {
+		if (++at->npool >= ALLOC_POOL_COUNT) {
 			fprintf (stderr, "FAIL: Cannot allocate more memory in the pool\n");
-			exit(1);
+			exit (1);
 		}
-		at->nodes[at->npool] = malloc (sizeof(AltNode)*ALLOC_POOL_SIZE);
+		at->nodes[at->npool] = malloc (sizeof (AltNode)*ALLOC_POOL_SIZE);
 		at->ncount = 0;
 	}
 	return &at->nodes[at->npool][at->ncount++];
@@ -52,12 +52,10 @@ static int _word_type(AltState *st) {
 }
 
 static void engine_cb_word(AltState *st, char ch) {
-	AltTree *at = (AltTree *) st->user;
 	AltNode *node;
-
+	AltTree *at = (AltTree *) st->user;
 	if (at->laststr && !*st->str && !*at->laststr)
 		return;
-
 	node = alt_node_new (st->user);
 	node->type = _word_type (st);
 	node->str = strdup (st->str);
@@ -71,7 +69,7 @@ static void engine_cb_word(AltState *st, char ch) {
 		node->left = at->cur;
 	} else {
 		/* add node at same nest level */
-		//if (node != at->root) // do not infinite loop when only one node ???
+		if (node != at->root) // do not infinite loop when only one node
 			at->cur->down = node;
 		node->up = at->cur;
 	} 
@@ -128,26 +126,25 @@ AltNode* alt_tree_resolve(AltState *st, const char *name) {
 	return NULL;
 }
 
-void alt_tree(AltState *st, int debug) {
-	AltTree *at = (AltTree*) malloc (sizeof(AltTree));
-	at->depth[0] = at->cur = at->root = 0;
-	at->npool = -1;
-	at->ncount = ALLOC_POOL_SIZE;
-	st->user = (void *) at;
-	/* set tree callbacks */
-	st->debug = debug;
-	st->cb_word = engine_cb_word;
-	st->cb_level = engine_cb_level;
-}
-
 void alt_tree_free(AltState *st) {
 	int i;
 	AltTree *at;
 	if (st != NULL && st->user != NULL) {
 		at = (AltTree*) st->user;
-		for(i=0; i<at->npool; i++)
+		for (i=0; i<at->npool; i++)
 			free (at->nodes[i]);
-		free(at);
+		free (at);
 		st->user = NULL;
 	}
+}
+
+void alt_tree(AltState *st) {
+	AltTree *at = (AltTree*) malloc (sizeof (AltTree));
+	at->depth[0] = at->cur = at->root = 0;
+	at->npool = -1;
+	at->ncount = ALLOC_POOL_SIZE;
+	st->user = (void *) at;
+	/* set tree callbacks */
+	st->cb_word = engine_cb_word;
+	st->cb_level = engine_cb_level;
 }

@@ -4,7 +4,7 @@
 
 /* tree */
 #define TREE_DEPTH 32
-#define CHF(x) (x==' '?'s':x=='\t'?'t':x=='\n'?'n':x=='\r'?'r':x)
+#define CHF(x) (x=='\t'?'t':x=='\n'?'n':x=='\r'?'r':(x>'~'||x<' ')?'?':x)
 
 typedef enum {
 	KEY_BLOCK, // {
@@ -71,7 +71,7 @@ int parse_fd(AltState *st, int fd);
 int parse_file(AltState *st, const char *file);
 int parse_is_operator(char ch);
 
-void alt_tree(AltState *st, int debug);
+void alt_tree(AltState *st);
 void alt_tree_walk(AltState *st);
 AltNode* alt_tree_resolve(AltState *st, const char *name);
 void alt_tree_walk(AltState *st);

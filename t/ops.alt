@@ -1,4 +1,5 @@
 main {
+  a+=3;
   foo= 3
 jeje/*
   bar =4

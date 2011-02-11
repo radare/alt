@@ -173,7 +173,7 @@ int parse_fd(AltState *st, int fd) {
 	char buf[1024];
 	do {
 		ret = read (fd, buf, 1024);
-		for (i=0;i<ret;i++)
+		for (i=0; i<ret; i++)
 			if (!parse_char (st, buf[i]))
 				return 0;
 	} while (ret>0);
