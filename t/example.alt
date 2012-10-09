@@ -24,6 +24,7 @@ Library:Socket {
 main {
   a = 0
   b = 4
+  array [1,2,3,4]
   args { "hello World %d" 33 }
   .printf args
   .printf { "hello world %d\n" 33 }

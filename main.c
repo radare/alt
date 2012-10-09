@@ -7,7 +7,7 @@
 
 void cb_level(AltState *st, int delta, char ch) {
 	PRINTLEVEL(st->level);
-	printf (delta>0? "{\n": "}\n");
+	printf (delta>0? "%c\n": "%c\n", ch);
 }
 
 static void strfilter (char *str, const char *src, int len) {
