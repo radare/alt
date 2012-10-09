@@ -12,7 +12,7 @@ int parse_is_operator(char ch) {
 }
 
 void parse_pushword(AltState *st, char ch) {
-	if (st->stridx == 0 && st->mode != MODE_STRING)
+	if (st->stridx == 0 && ch != ':' && st->mode != MODE_STRING)
 		return;
 	st->str[st->stridx] = 0;
 	st->cb_word (st, ch);
@@ -172,7 +172,7 @@ int parse_fd(AltState *st, int fd) {
 	int ret, i;
 	char buf[1024];
 	do {
-		ret = read (fd, buf, 1024);
+		ret = read (fd, buf, sizeof (buf));
 		for (i=0; i<ret; i++)
 			if (!parse_char (st, buf[i]))
 				return 0;
