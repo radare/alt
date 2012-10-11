@@ -1,7 +1,5 @@
 #define PRINTLEVEL(x) { int i;for(i=0;i<x;i++) printf("  "); }
 
-#define DEBUG 0
-
 /* tree */
 #define TREE_DEPTH 32
 #define CHF(x) (x=='\t'?'t':x=='\n'?'n':x=='\r'?'r':(x>'~'||x<' ')?'?':x)
@@ -59,6 +57,7 @@ typedef struct AltState {
 	char curchar;
 	char str[ALT_MAX_LEVEL];
 	int stridx;
+	void (*cb_comment)(struct AltState *st, char ch);
 	void (*cb_word)(struct AltState *st, char ch);
 	void (*cb_level)(struct AltState *st, int delta, char ch);
 	int (*cb_error)(struct AltState *st, const char *str);

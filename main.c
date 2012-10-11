@@ -23,6 +23,11 @@ static void strfilter (char *str, const char *src, int len) {
 	*str = 0;
 }
 
+void cb_comment(AltState *st, char ch) {
+	PRINTLEVEL (st->level);
+	printf ("/*%s*/ '%c'\n", st->str, CHF (ch));
+}
+
 void cb_word(AltState *st, char ch) {
 	char str[1024];
 	PRINTLEVEL (st->level);
@@ -62,6 +67,8 @@ int main(int argc, char **argv) {
 	st.cb_word = cb_word;
 	st.cb_level = cb_level;
 	st.cb_error = cb_error;
+	st.cb_comment = cb_comment;
+
 	if (mode == 'r' || mode == 't')
 		alt_tree (&st);
 	if (idx>=argc)

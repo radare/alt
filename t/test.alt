@@ -1,6 +1,7 @@
 # Line comment
 word1(foo)
 { bar cow
+	/* patata */
 	name = "This is new\nAnd cool"
 	Library.Name {
 		name = "stuff"

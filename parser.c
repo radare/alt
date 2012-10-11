@@ -11,12 +11,21 @@ int parse_is_operator(char ch) {
 		ch=='|'||ch=='^'||ch=='/'||ch=='%'||ch=='*'||ch=='!'||ch=='<');
 }
 
+void parse_pushcomment(AltState *st, char ch) {
+	st->str[st->stridx-1] = 0;
+	memmove (st->str, st->str+1, strlen (st->str));
+	if (st->cb_comment)
+		st->cb_comment (st, ch);
+	st->str[0] = 0;
+	st->stridx = 0;
+}
+
 void parse_pushword(AltState *st, char ch) {
 	if (st->stridx == 0 && ch != ':' && st->mode != MODE_STRING)
 		return;
 	st->str[st->stridx] = 0;
 	st->cb_word (st, ch);
-	memset (&st->str, 0, sizeof (st->str));
+	st->str[0] = 0;
 	st->stridx = 0;
 }
 
@@ -33,9 +42,13 @@ int parse_char(AltState *st, char ch) {
 		return 0;
 
 	if (st->skipuntil) {
-		if (ch == st->skipuntil)
-			st->skipuntil = 0;
-		else return 1;
+		if (ch != st->skipuntil) {
+			st->str[st->stridx++] = ch;
+			return 1;
+		}
+		st->stridx++;
+		parse_pushcomment (st, ch);
+		st->skipuntil = 0;
 	}
 	st->curchar = ch;
 	switch (st->mode) {
@@ -93,6 +106,8 @@ int parse_char(AltState *st, char ch) {
 				switch (ch) {
 				case '*':
 					st->mode = MODE_COMMENT;
+					parse_pushword (st, ch);
+					st->mode = MODE_PARSE;
 					break;
 				case '/':
 					st->skipuntil = '\n';
@@ -100,7 +115,6 @@ int parse_char(AltState *st, char ch) {
 				}
 			} else {
 				if (parse_is_operator (ch)) {
-					parse_pushword (st, ch);
 					st->mode = MODE_OPERATOR; // XXX dupped
 					return parse_char (st, ch);
 				} else parse_concatchar (st, ch);
@@ -110,11 +124,11 @@ int parse_char(AltState *st, char ch) {
 		break;
 	case MODE_OPERATOR:
 		if (st->lastchar == '/') {
-			switch(ch) {
+			switch (ch) {
 			case '*':
 				st->mode = MODE_COMMENT;
 				st->stridx = 0;
-				break;
+				return parse_char (st, ch);
 			case '/':
 				st->skipuntil = '\n';
 				st->mode = MODE_COMMENT;
@@ -130,10 +144,14 @@ int parse_char(AltState *st, char ch) {
 		} else st->str[st->stridx++] = ch; //return parse_char (st, ch);
 		break;
 	case MODE_COMMENT:
-		if (ch == '/' && st->lastchar == '*') {
+		if (st->lastchar == '*' && ch == '/') {
+			parse_pushcomment (st, ch);
 			st->mode = MODE_PARSE;
-			st->stridx = 0;
+			st->stridx = ch = 0;
 			ch = 0; // workaround for default->lastchar==/
+		} else {
+			st->str[st->stridx++] = ch;
+			//st->str[st->stridx] = 0;
 		}
 		break;
 	case MODE_STRING:

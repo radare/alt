@@ -43,10 +43,10 @@ static int _word_type(AltState *st) {
 	if (st->mode == MODE_STRING) {
 		type = 'S';
 	} else if (*st->str>='0' && *st->str<='9') {
-		if (strchr(st->str, '.'))
+		if (strchr (st->str, '.'))
 			type = 'F';
 		else type = 'I';
-	} else if (parse_is_operator(*st->str))
+	} else if (parse_is_operator (*st->str))
 		type = 'O';
 	return type;
 }
@@ -87,11 +87,13 @@ static void engine_cb_word(AltState *st, char ch) {
 static void _alt_tree_walk(AltNode *node) {
 	if (node) {
 		PRINTLEVEL (node->level);
-		printf (" - %d %c : (%s) '%c'\n", node->level, node->type, node->str, CHF (node->endch));
-if (node != node->right)
-		_alt_tree_walk (node->right);
-if (node != node->down)
-		_alt_tree_walk (node->down);
+		printf (" - %d %c : (%s) '%c'\n",
+			node->level, node->type,
+			node->str, CHF (node->endch));
+		if (node != node->right)
+			_alt_tree_walk (node->right);
+		if (node != node->down)
+			_alt_tree_walk (node->down);
 	}
 }
 
