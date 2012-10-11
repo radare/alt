@@ -1,0 +1,34 @@
+LALR
+====
+
+Look-Ahead Left-to-Right
+
+# yalt file format
+$ cat lang.ya
+type: "void" "char" "int" "short" "long" "float" "double"
+varlist: [type $name ["," ...]]
+callvarlist: [$name ["," ...]]
+function_signature: type $name "(" varlist ")" ";"
+function: type $name "(" varlist ")" block
+block: "{" [...] "}"
+struct: "struct" [$name] "{"
+call: $name "(" callvarlist ")"
+keywords: "if" while 
+statement: "(" statement ")"
+for_loop: "for" "(" statement ")" block
+conditional: "if" "(" statement ")" block
+conditional_else: "else" statement ";"
+conditional_else: "else" "(" statement ")" block
+while: "if" "(" statement ")"
+assignment: $name "=" * ";"
+
+$ yalt lang.ya > lang.c
+$ cat lang.c
+
+static int type(const char *kw) {
+}
+static int varlist(const char *kw) {
+}
+
+#include "lang.yah"
+#include "lang.yac"
