@@ -198,9 +198,9 @@ int parse_fd(AltState *st, int fd) {
 
 int parse_file(AltState *st, const char *file) {
 	int fd = open (file, O_RDONLY);
-	if (fd != -1) {
-		parse_fd (st, fd);
-		close (fd);
-	}
-	return (fd==-1);
+	if (fd == -1)
+		return 1;
+	parse_fd (st, fd);
+	close (fd);
+	return 0;
 }

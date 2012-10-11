@@ -74,8 +74,10 @@ int main(int argc, char **argv) {
 	if (idx>=argc)
 		ret = parse_fd (&st, 0);
 	else for (i=idx; i<argc; i++) {
-		if (parse_file (&st, argv[i]))
+		if (parse_file (&st, argv[i])) {
+			fprintf (stderr, "Cannot open file '%s'\n", argv[i]);
 			return 1;
+		}
 	}
 	if (mode == 'r')
 		alt_script (&st);
