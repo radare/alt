@@ -43,7 +43,7 @@ int parse_char(AltState *st, char ch) {
 
 	if (st->skipuntil) {
 		if (ch != st->skipuntil) {
-			st->str[st->stridx++] = ch;
+			parse_concatchar (st, ch);
 			return 1;
 		}
 		st->stridx++;
@@ -74,8 +74,7 @@ int parse_char(AltState *st, char ch) {
 			case '(': st->levels[st->level] = ')'; break;
 			case '[': st->levels[st->level] = ']'; break;
 			}
-			st->level++;
-			if (st->level>ALT_MAX_LEVEL)
+			if (++st->level > ALT_MAX_LEVEL)
 				return st->cb_error (st, "Too much recursivity");
 			break;
 		case ']':
@@ -116,6 +115,8 @@ int parse_char(AltState *st, char ch) {
 			} else {
 				if (parse_is_operator (ch)) {
 					st->mode = MODE_OPERATOR; // XXX dupped
+					if (st->stridx>0)
+						parse_pushword (st, ch);
 					return parse_char (st, ch);
 				} else parse_concatchar (st, ch);
 			}
@@ -141,7 +142,7 @@ int parse_char(AltState *st, char ch) {
 			parse_pushword (st, ch);
 			// XXX: check if return here is ok
 			return parse_char (st, ch);
-		} else st->str[st->stridx++] = ch; //return parse_char (st, ch);
+		} else parse_concatchar (st, ch);
 		break;
 	case MODE_COMMENT:
 		if (st->lastchar == '*' && ch == '/') {
@@ -149,10 +150,7 @@ int parse_char(AltState *st, char ch) {
 			st->mode = MODE_PARSE;
 			st->stridx = ch = 0;
 			ch = 0; // workaround for default->lastchar==/
-		} else {
-			st->str[st->stridx++] = ch;
-			//st->str[st->stridx] = 0;
-		}
+		} else parse_concatchar (st, ch);
 		break;
 	case MODE_STRING:
 		if (st->lastchar == '\\') {
