@@ -1,5 +1,5 @@
 CFLAGS+=-Wall -g -O2
-OBJ=main.o parser.o tree.o script.o
+OBJ=main.o alt.o tree.o script.o
 PREFIX?=/usr
 BIN=alt
 

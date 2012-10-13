@@ -68,7 +68,8 @@ int parse_char(AltState *st, char ch) {
 		case '(':
 		case '{':
 			parse_pushword (st, ch);
-			st->cb_level (st, 1, ch);
+			if (st->cb_level)
+				st->cb_level (st, 1, ch);
 			switch(ch) {
 			case '{': st->levels[st->level] = '}'; break;
 			case '(': st->levels[st->level] = ')'; break;
@@ -87,7 +88,8 @@ int parse_char(AltState *st, char ch) {
 			if (st->levels[st->level] != ch)
 				return st->cb_error (st,
 					"Unexpected closing parentesis.\n");
-			st->cb_level (st, -1, ch);
+			if (st->cb_level)
+				st->cb_level (st, -1, ch);
 			break;
 		case '\n':
 			st->line++;

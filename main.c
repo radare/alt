@@ -6,18 +6,16 @@
 #include "alt.h"
 
 void cb_level(AltState *st, int delta, char ch) {
-	PRINTLEVEL(st->level);
+	PRINTLEVEL (st->level);
 	printf (delta>0? "%c\n": "%c\n", ch);
 }
 
 static void strfilter (char *str, const char *src, int len) {
-	int i = 0;
+	int i;
 	for (i=0; i<len && *src; i++, src++, str++) {
 		int ch = CHF (*src);
-		if (ch != *src || ch == '\\') {
-			*str = '\\';
-			str++;
-		}
+		if (ch != *src || ch == '\\')
+			*str++ = '\\';
 		*str = ch;
 	}
 	*str = 0;
@@ -52,10 +50,9 @@ static int _help(const char *arg0) {
 
 int main(int argc, char **argv) {
 	int i, ret, idx = 1;
+	AltState st = {0};
 	int mode = 'p';
-	AltState st;
 
-	memset (&st, 0, sizeof (AltState));
 	while (idx<argc) {
 		if (argv[idx][0] != '-')
 			break;

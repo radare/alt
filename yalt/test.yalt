@@ -1,0 +1,14 @@
+/*
+ * test file for yalt
+ */
+
+/* variable set */
+var int foo = 3;
+int foo = 3;
+
+/* variable defintion */
+int bar;
+
+/* function signature */
+int signature ();
+int signature2 (int length);
