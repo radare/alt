@@ -222,7 +222,7 @@ void cb_level(AltState *st, int delta, char ch) {
 	PRINTLEVEL (st->level);
 	if (delta<0) {
 		callback (strack_name);
-reset ();
+		reset ();
 	}
 	printf (delta>0? "%c\n": "%c\n", ch);
 }
@@ -230,77 +230,24 @@ reset ();
 void cb_word(AltState *st, char ch) {
 	char str[1024];
 	PRINTLEVEL (st->level);
-	printf ("(%s) '%c'\n", st->str, CHF (ch));
+	//printf ("(%s) '%c'\n", st->str, CHF (ch));
 	match (st->str, ch);
 }
+
+int cb_error (AltState *st, const char *err) { return 0; }
 
 AltState parser_new() {
 	AltState st = {0};
 	reset ();
+	st.cb_error = cb_error;
 	st.cb_word = cb_word;
 	st.cb_level = cb_level;
 	return st;
 }
 
-main() {
+int main(int argc, char **argv) {
 	AltState st = parser_new ();
-	parse_fd (&st, 0);
+	if (argc>1) parse_file (&st, argv[1]);
+	else parse_fd (&st, 0);
+	return 0;
 }
-
-#if 0
-void onword (AltState *a, char w) {
-	int do_or = 0;
-	char *word = st->str;
-	if (*word=='|') {
-		do_or = 1;
-		word++;
-	}
-	for (i=0;test[i].name; i++) {
-		if (test[i].idx==-2) continue;
-		if (!test[i].ptr) test[i].ptr = test[i].list;
-		switch (test[i].ptr) {
-		case '\'':
-			// compare string
-			if (!strcmp (word, test[i].ptr+1)) {
-				test[i].ptr += strlen (test[i]) + 1;
-				if (test[i].ptr[0])
-					test[i].idx++;
-				else test[i].idx = -2;
-			} else {
-				if (do_or) {
-					test[i].ptr += strlen (test[i]) + 1;
-					if (test[i].ptr[0])
-						test[i].idx++;
-				} else test[i].idx = -2;
-			}
-			break;
-		case ';':
-			// finnish the statement
-			break;
-		case '$':
-			// set value name
-//			setvar (
-			break;
-		default:
-			// reference another rule
-			break;
-		}
-	}
-{
-	int i;
-	int max = 0;
-	int maxi = 0;
-	for (i=0; test[i].name; i++) {
-		if (!test[i].ptr[0] && test[i].idx>max) {
-			maxi = i;
-			max = test[i].idx;
-		}
-	}
-	// matching rule is 'maxi'
-}
-}
-
-for () {
-	getkeyword ()
-}
-#endif
