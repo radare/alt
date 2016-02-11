@@ -16,7 +16,10 @@ locdiff:
 	echo $$((A-B))
 
 install:
-	cp alt ${DESTDIR}${PREFIX}/bin
+	cp ${BIN} ${PREFIX}/bin
+
+uninstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/${BIN}
 
 clean:
 	rm -f ${OBJ} ${BIN}
