@@ -1,5 +1,7 @@
 #define PRINTLEVEL(x) { int i;for(i=0;i<x;i++) printf("  "); }
 
+#define ALT_VERSION "0.1"
+
 /* tree */
 #define TREE_DEPTH 32
 #define CHF(x) (x=='\t'?'t':x=='\n'?'n':x=='\r'?'r':(x>'~'||x<' ')?'?':x)

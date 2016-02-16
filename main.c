@@ -38,12 +38,18 @@ int cb_error(AltState *st, const char *fmt) {
 	return 0;
 }
 
+static int _version(const char *arg0) {
+	printf (ALT_VERSION"\n");
+	return 0;
+}
+
 static int _help(const char *arg0) {
 	printf ("Usage: %s [-rtph] [file ...]\n"
 	        "  -d   show debug\n"
 	        "  -r   run script\n"
 	        "  -p   show parse tree\n"
 	        "  -t   show node tree\n"
+	        "  -v   show version\n"
 	        "  -h   this help\n", arg0);
 	return 0;
 }
@@ -57,6 +63,7 @@ int main(int argc, char **argv) {
 		if (argv[idx][0] != '-')
 			break;
 		mode = argv[idx][1];
+		if (mode == 'v') return _version();
 		if (mode == 'd') st.debug = 1; else
 		if (mode == 'h') return _help (argv[0]);
 		idx++;
