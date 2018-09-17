@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 		if (argv[idx][0] != '-')
 			break;
 		mode = argv[idx][1];
-		if (mode == 'v') return _version();
+		if (mode == 'v') return _version(argv[0]);
 		if (mode == 'd') st.debug = 1; else
 		if (mode == 'h') return _help (argv[0]);
 		idx++;

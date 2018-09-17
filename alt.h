@@ -38,7 +38,7 @@ typedef struct AltTree {
 } AltTree;
 
 /* parser */
-#define ALT_MAX_LEVEL 256
+#define ALT_MAX_LEVEL 4096
 
 typedef enum {
 	MODE_PARSE,
